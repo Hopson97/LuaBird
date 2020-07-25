@@ -21,6 +21,9 @@ bool luaOk(lua_State* L, int result)
 // Rectangle.new(width, height, x, y)
 int lua_Rectangle_new(lua_State* L) 
 {
+    sf::RectangleShape* s = new sf::RectangleShape();
+    *(void **)lua_newuserdata(L, sizeof(void *)) = s;
+
     float w = (float)luaL_checknumber(L, -1);
     float h = (float)luaL_checknumber(L, -1);
     float x = (float)luaL_checknumber(L, -1);
@@ -28,7 +31,7 @@ int lua_Rectangle_new(lua_State* L)
     std::cout << x << " " << y << " " << w << " " << h << std::endl;
     sf::RectangleShape* test =
         (sf::RectangleShape*)(lua_newuserdata(L, sizeof(sf::RectangleShape)));
-
+    new (test) sf::RectangleShape();
     test->setPosition({x, y});
     test->setSize({x, y});
 
@@ -52,17 +55,28 @@ void openLibRectangle(lua_State* L)
 {
     luaL_newmetatable(L, "Rectangle");
     lua_pushvalue(L, -1);
+
+
+
+    
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, lua_rectMethods, 0);
     luaL_newlib(L, lua_rectLib);
     lua_setglobal(L, "Rectangle");
 }
 
+struct Printer {
+    void print(int a, int b)
+    {
+    std::cout << "Meta test: " << a << " " << b << std::endl;
 
+    }
+};
 
 struct MetaTest {
     int a = 0;
     int b = 0;
+    Printer printer;
 };
 
 int lua_MetaTest_new(lua_State* L)
@@ -82,7 +96,7 @@ int lua_MetaTest_new(lua_State* L)
 int lua_MetaTest_print(lua_State* L)
 {
     MetaTest* metaTest = (MetaTest*)luaL_checkudata(L, 1, "MetaTest");
-    std::cout << "Meta test: " << metaTest->a << " " << metaTest->b << std::endl;
+    metaTest->printer.print(metaTest->a, metaTest->b);
     return 0;
 }
 
@@ -115,6 +129,13 @@ int main()
 
     open_MetaTest(L);
     openLibRectangle(L);
+
+    sf::RectangleShape* test =
+        (sf::RectangleShape*)(malloc(sizeof(sf::RectangleShape)));
+    *new (test) sf::RectangleShape();
+    test->setPosition({5, 5});
+    test->setSize({5, 5});
+    free(test);
 
     if (luaOk(L, luaL_dofile(L, "game/main.lua"))) {
         /*

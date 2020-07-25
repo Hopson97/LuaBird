@@ -7,8 +7,3 @@ local function newRect(width, height, x, y)
 end
 
 local rect = Rectangle.new(100, 100, 10, 10)--newRect(100, 100, 10, 10)
-
-
-function update()
-
-end
