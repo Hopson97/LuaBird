@@ -30,23 +30,36 @@ int lua_MetaTest_new(lua_State* L)
     MetaTest* test = (MetaTest*)(lua_newuserdata(L, sizeof(MetaTest)));
     test->a = a;
     test->b = b;
+
+    luaL_getmetatable(L, "MetaTest");
+    lua_setmetatable(L, -2);
+
     return 1;
 }
 
 int lua_MetaTest_print(lua_State* L)
 {
-    MetaTest* metaTest = (MetaTest*)lua_touserdata(L, 1);
+    MetaTest* metaTest = (MetaTest*)luaL_checkudata(L, 1, "MetaTest");
     std::cout << "Meta test: " << metaTest->a << " " << metaTest->b << std::endl;
     return 0;
 }
 
+const luaL_Reg metaTestLib[] = {
+    {"new", lua_MetaTest_new},
+    {NULL, NULL},
+};
+
+const luaL_Reg metaTestMethods[] = {
+    {"print", lua_MetaTest_print},
+    {NULL, NULL},
+};
+
 void open_MetaTest(lua_State* L)
 {
-    const luaL_Reg metaTestLib[] = {
-        {"new", lua_MetaTest_new},
-        {"print", lua_MetaTest_print},
-        {NULL, NULL}
-    };
+    luaL_newmetatable(L, "MetaTest");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index"); 
+    luaL_setfuncs(L, metaTestMethods, 0); 
     luaL_newlib(L, metaTestLib);
     lua_setglobal(L, "MetaTest");
 }
