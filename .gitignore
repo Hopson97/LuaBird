@@ -1,0 +1,45 @@
+#
+#   Common
+#
+.vscode
+tags
+*.temp
+*.srctrlprj
+*.srctrldb
+*.srctrlbm
+
+programmes/
+
+#
+#   Linux
+#
+build/
+bin/
+
+#
+#   Windows
+#
+*.dll
+CMakeFiles/
+CMakeCache.txt
+*.exe
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.vs
+
+Debug/
+Release/
+
+# Experimental 
+experimental/
+
+*.zip
+
+# Other
+imgui.ini
+Yacee/
+settings.txt
