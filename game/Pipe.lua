@@ -1,5 +1,5 @@
-local PIPE_GAP = 128
-local PIPE_WIDTH = 32
+local PIPE_GAP = 150
+local PIPE_WIDTH = 50
 local WIDTH = 1280
 local HEIGHT = 720
 
@@ -10,35 +10,39 @@ local function randHeight()
 	return math.random(PIPE_GAP, HEIGHT / 2) - HEIGHT
 end
 
-local function resetPipe(pipe, index)
+function Pipe:new(index)
+	local pipe = {}
+	setmetatable(pipe, Pipe)
+
 	local height = randHeight();
-	local x = WIDTH / 2 + PIPE_GAP * 3 * index;
-	pipe.top:setPosition(x, height)
-	pipe.bottom:setPosition(x, height + PIPE_GAP + HEIGHT)
+	pipe.top = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
+	pipe.bottom = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
+	pipe.dirty = false
+
+	pipe.top:setTexture("res/pipe.png")
+	pipe.bottom:setTexture("res/pipe.png")
+
+	pipe:reset(index)
+	return pipe
 end
 
-function Pipe:new(index)
-	local props = {}
-	setmetatable(props, Pipe)
-
-	print("Created pipe")
-
-	local height = randHeight();
-	props.top = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
-	props.bottom = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
-
-	props.top:setTexture("res/pipe.png")
-	props.bottom:setTexture("res/pipe.png")
-
-	resetPipe(props, index)
-	return props
+function Pipe:xPos()
+	local x, y = self.top:getPosition()
+	return x
 end
 
 function Pipe:update(dt)
 	self.top:move(-200 * dt, 0)
 	self.bottom:move(-200 * dt, 0)
-	local x, y = self.top:getPosition()
-	if x < -PIPE_WIDTH then
-		resetPipe(self, 3)
+	if self:xPos() < -PIPE_WIDTH then
+		self.reset(self, 3)
 	end
+end
+
+function Pipe:reset(index)
+	local height = randHeight();
+	local x = WIDTH + PIPE_GAP * 3 * index;
+	self.top:setPosition(x, height)
+	self.bottom:setPosition(x, height + PIPE_GAP + HEIGHT)
+	self.dirty = false
 end

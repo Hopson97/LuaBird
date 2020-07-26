@@ -51,7 +51,6 @@ void LuaSprite::setPosition(float x, float y)
     m_verts[1].position = {x, y + m_size.y};
     m_verts[2].position = {x + m_size.x, y + m_size.y};
     m_verts[3].position = {x + m_size.x, y};
-    std::cout << "Position set " << x << " " << y << std::endl;
 }
 
 bool LuaSprite::intersecting(LuaSprite& other) const
