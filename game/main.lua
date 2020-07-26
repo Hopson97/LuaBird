@@ -1,38 +1,39 @@
 local BOOST = 300
 local WIDTH = 1280
 local HEIGHT = 720
-local PIPE_GAP = 128
 
-local pipes = {}
+dofile("game/Pipe.lua");
 
 math.randomseed(os.time())
 
-local function addPipes(index)
-	local height = math.random(PIPE_GAP, HEIGHT / 2) - HEIGHT
-	table.insert(pipes, {
-		top = {
-			sprite = newSprite(32, HEIGHT, WIDTH / 2 + 64 * 8 * index, height),
-		},
-		bottom = {
-			sprite = newSprite(32, HEIGHT,  WIDTH / 2 + 64 * 8 * index, height + PIPE_GAP + HEIGHT),
-		}
-	})
-end		
+local background = newSprite(WIDTH, HEIGHT, 0, 0)
+background:setTexture("res/bg.png");
 
-addPipes(0)
-addPipes(1)
-addPipes(2)
+local pipes = {
+	Pipe:new(0),
+	Pipe:new(1),
+	Pipe:new(2),
+	Pipe:new(3),
+	Pipe:new(4),
+}
 
+local grassForeground = {
+	newSprite(WIDTH, 64, 0, HEIGHT - 64),
+	newSprite(WIDTH, 64, WIDTH, HEIGHT - 64)
+}
+for k, grass in pairs(grassForeground) do
+  grass:setTexture("res/grass.png");
+end
 
 local bird = {
-	sprite = newSprite(64, 64, 100, 100),
+	sprite = newSprite(64, 32, 100, 100),
 	vx = 0,
 	vy = 0
 }
 
-
 bird.sprite:setTexture("res/bird.png");
 
+-- Function called once per frame from C++ side
 function update(dt)
 	if Keyboard.isKeyPressed("W") and bird.vy > 0 then
 		bird.vy = -BOOST * dt
@@ -50,10 +51,15 @@ function update(dt)
 	bird.vx = bird.vx * 0.99 
 	bird.vy = bird.vy * 0.99
 
-	for k, v in pairs(pipes) do
-	  v.top.sprite:move(-200 * dt, 0)
-	  v.bottom.sprite:move(-200 * dt, 0)
-
+	for k, pipe in pairs(pipes) do
+	  pipe:update(dt)
 	end
 
+	for k, pipe in pairs(foreground) do
+	  v:move(-200 * dt, 0)
+	  local x, y = v:getPosition()
+	  if x < -WIDTH then
+		v:move(WIDTH * 2, 0)
+	  end
+	end
 end
