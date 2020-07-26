@@ -1,10 +1,12 @@
-rects = {}
-test_table = {5,6,7,8}
 
-local function newRect(width, height, x, y)
-	local rect = Rectangle.new(width, height, x, y);
-	table.insert(rects, rect);
-	return rect;
+-- Globals to be accessed via the C++ code
+sprites = {}
+
+-- Util functions
+local function newSprite(width, height, x, y)
+	local sprite = Sprite.new(width, height, x, y);
+	table.insert(sprites, sprite);
+	return sprite;
 end
 
 
@@ -14,4 +16,4 @@ end
 
 
 
-local rect = newRect(100, 100, 100, 100)
+local sprite = newSprite(100, 100, 100, 100)
