@@ -6,13 +6,17 @@
 
 #include "LuaIncludes.h"
 
-struct LuaSprite {
+class LuaTexture;
+
+class LuaSprite {
   public:
     void init(float width, float height, float x, float y);
     void draw(sf::RenderWindow& window);
 
     void move(float x, float y);
     bool intersecting(LuaSprite& other) const;
+
+    void setTexture(const LuaTexture& texture);
 
     static void luaRegister(lua_State* L);
 
@@ -23,5 +27,5 @@ struct LuaSprite {
     sf::Vector2f m_position;
     sf::Vector2f m_size;
 
-
+    const LuaTexture* m_texture;
 };

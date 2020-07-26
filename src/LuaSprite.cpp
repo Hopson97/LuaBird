@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "LuaTexture.h"
+
 void LuaSprite::init(float width, float height, float x, float y)
 {
     m_verts[0].position = {x, y};
@@ -34,6 +36,15 @@ void LuaSprite::move(float x, float y)
 bool LuaSprite::intersecting(LuaSprite& other) const
 {
     return bounds().intersects(other.bounds());
+}
+
+void LuaSprite::setTexture(const LuaTexture& texture)
+{
+    m_texture = &texture;
+    m_verts[0].texCoords = {0, 0};
+    m_verts[1].texCoords = {0, texture.getSize().y};
+    m_verts[2].texCoords = {texture.getSize().x, texture.getSize().y};
+    m_verts[3].texCoords = {texture.getSize().x, 0};
 }
 
 sf::FloatRect LuaSprite::bounds() const
@@ -75,12 +86,22 @@ namespace {
         return 0;
     }
 
-    int lua_Sprite_intersects(lua_State* L) 
+    // sprite:intersects(Sprite)
+    int lua_Sprite_intersects(lua_State* L)
     {
         LuaSprite* sprite = (LuaSprite*)luaL_checkudata(L, 1, "Sprite");
         LuaSprite* otherSprite = (LuaSprite*)luaL_checkudata(L, 2, "Sprite");
         lua_pushboolean(L, sprite->intersecting(*otherSprite));
         return 1;
+    }
+
+    // sprite:setTexture(LuaTexture)
+    int lua_Sprite_setTexture(lua_State* L)
+    {
+        LuaSprite* sprite = (LuaSprite*)luaL_checkudata(L, 1, "Sprite");
+        LuaTexture* texture = (LuaTexture*)luaL_checkudata(L, 2, "Texture");
+        sprite->setTexture(*texture);
+        return 0;
     }
 
     const luaL_Reg lua_spriteLib[] = {
@@ -91,6 +112,7 @@ namespace {
     const luaL_Reg lua_spriteMethods[] = {
         {"move", lua_Sprite_move},
         {"intersects", lua_Sprite_intersects},
+        {"setTexture", lua_Sprite_intersects},
         {NULL, NULL},
     };
 
