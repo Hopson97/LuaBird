@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Resources.h"
 
+#include "LuaTexture.h"
+
 void LuaSprite::init(float width, float height, float x, float y)
 {
     m_verts[0].position = {x, y};
