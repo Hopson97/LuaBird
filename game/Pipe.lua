@@ -26,6 +26,10 @@ function Pipe:new(index)
 	local height = randHeight();
 	props.top = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
 	props.bottom = newSprite(PIPE_WIDTH, HEIGHT, 0, 0)
+
+	props.top:setTexture("res/pipe.png")
+	props.bottom:setTexture("res/pipe.png")
+
 	resetPipe(props, index)
 	return props
 end
