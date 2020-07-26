@@ -12,8 +12,8 @@ class LuaSprite {
     void draw(sf::RenderWindow& window);
 
     void move(float x, float y);
+    const sf::Vector2f& getPosition() const;
     bool intersecting(LuaSprite& other) const;
-
     void setTexture(const sf::Texture& texture);
 
     static void luaRegister(lua_State* L);

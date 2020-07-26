@@ -1,7 +1,7 @@
 #include "LuaSprite.h"
 
-#include <iostream>
 #include "Resources.h"
+#include <iostream>
 
 #include "LuaTexture.h"
 
@@ -37,6 +37,11 @@ void LuaSprite::move(float x, float y)
     for (auto& vertex : m_verts) {
         vertex.position += {x, y};
     }
+}
+
+const sf::Vector2f& LuaSprite::getPosition() const
+{
+    return m_position;
 }
 
 bool LuaSprite::intersecting(LuaSprite& other) const
@@ -92,6 +97,16 @@ namespace {
         return 0;
     }
 
+    // sprite:setTexture(name)
+    int lua_Sprite_getPosition(lua_State* L)
+    {
+        LuaSprite* sprite = (LuaSprite*)luaL_checkudata(L, 1, "Sprite");
+        auto& pos = sprite->getPosition();
+        lua_pushnumber(L, pos.x);
+        lua_pushnumber(L, pos.y);
+        return 2;
+    }
+
     // sprite:intersects(Sprite)
     int lua_Sprite_intersects(lua_State* L)
     {
@@ -117,6 +132,7 @@ namespace {
 
     const luaL_Reg lua_spriteMethods[] = {
         {"move", lua_Sprite_move},
+        {"getPosition", lua_Sprite_getPosition},
         {"intersects", lua_Sprite_intersects},
         {"setTexture", lua_Sprite_setTexture},
         {NULL, NULL},

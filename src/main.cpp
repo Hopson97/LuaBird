@@ -6,6 +6,21 @@
 #include <array>
 #include <iostream>
 
+template <typename T, typename F>
+void itrTable(lua_State* L, const char* tableName, F func)
+{
+    lua_getglobal(L, tableName);
+    if (lua_istable(L, -1)) {
+        lua_pushnil(L);
+        while (lua_next(L, -2)) {
+            T* object = (T*)lua_touserdata(L, -1);
+            func(object);
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+    }
+}
+
 int main()
 {
     lua_State* L = luaL_newstate();
@@ -28,7 +43,7 @@ int main()
 
     sf::RenderWindow window({1280, 720}, "Lua Bird");
     window.setFramerateLimit(60);
-
+    sf::Clock clock;
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -39,22 +54,14 @@ int main()
         // Update
         lua_getglobal(L, "update");
         if (lua_isfunction(L, -1)) {
-            checkLua(L, lua_pcall(L, 0, 0, 0));
+            lua_pushnumber(L, clock.restart().asSeconds());
+            checkLua(L, lua_pcall(L, 1, 0, 0));
         }
 
         // Render
         window.clear();
-        lua_getglobal(L, "sprites");
-        if (lua_istable(L, -1)) {
-            lua_pushnil(L);
-            while (lua_next(L, -2)) {
-                LuaSprite* sprite = (LuaSprite*)lua_touserdata(L, -1);
-
-                sprite->draw(window);
-                lua_pop(L, 1);
-            }
-            lua_pop(L, 1);
-        }
+        itrTable<LuaSprite>(L, "sprites",
+                            [&window](auto* sprite) { sprite->draw(window); });
         window.display();
     }
 
