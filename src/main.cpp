@@ -1,10 +1,10 @@
 #include <SFML/Graphics.hpp>
 
+#include "LuaIncludes.h"
+#include "LuaKeyboard.h"
+#include "LuaSprite.h"
 #include <array>
 #include <iostream>
-#include "LuaIncludes.h"
-#include "LuaSprite.h"
-#include "LuaKeyboard.h"
 
 int main()
 {
@@ -14,33 +14,14 @@ int main()
     LuaSprite::luaRegister(L);
     luaRegisterKeyboard(L);
 
-    if (checkLua(L, luaL_dofile(L, "game/main.lua"))) {
-        /*
-        lua_getglobal(L, "doStuff");
-        if (lua_isfunction(L, -1)) {
-            lua_pushnumber(L, 10);
-            lua_pushnumber(L, 5);
+    if (!checkLua(L, luaL_dofile(L, "game/_lib.lua"))) {
+        std::cout << "Failed to load engine library\n";
+        return 1;
+    }
 
-            if (luaOk(L, lua_pcall(L, 2, 1, 0))) {
-                std::cout << "C++ Called" << lua_tonumber(L, -1) << "\n";
-            }
-        }
-
-        lua_getglobal(L, "test");
-        if (lua_istable(L, -1)) {
-            lua_pushstring(L, "name");
-            lua_gettable(L, -2);
-            test.name = lua_tostring(L, -1);
-            lua_pop(L, 1);
-
-            lua_pushstring(L, "by");
-            lua_gettable(L, -2);
-            test.by = lua_tostring(L, -1);
-            lua_pop(L, 1);
-
-            std::cout << test.name << ", by " << test.by <<  std::endl;
-        }
-        */
+    if (!checkLua(L, luaL_dofile(L, "game/main.lua"))) {
+        std::cout << "Failed to load game\n";
+        return 1;
     }
 
     // Cleanup
@@ -68,7 +49,7 @@ int main()
             lua_pushnil(L);
             while (lua_next(L, -2)) {
                 LuaSprite* sprite = (LuaSprite*)lua_touserdata(L, -1);
-                
+
                 sprite->draw(window);
                 lua_pop(L, 1);
             }
