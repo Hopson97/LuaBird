@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 
+#include <array>
 #include <iostream>
 
 extern "C" {
@@ -18,26 +19,51 @@ bool luaOk(lua_State* L, int result)
     return true;
 }
 
-// Rectangle.new(width, height, x, y)
-int lua_Rectangle_new(lua_State* L) 
-{
-    sf::RectangleShape* s = new sf::RectangleShape();
-    *(void **)lua_newuserdata(L, sizeof(void *)) = s;
+struct Rectangle {
+    std::array<sf::Vertex, 4> verts;
 
+    sf::Vector2f position;
+    sf::Vector2f size;
+
+    void init(float width, float height, float x, float y);
+    void draw(sf::RenderWindow& window);
+};
+
+void Rectangle::init(float width, float height, float x, float y)
+{
+    verts[0].position = {x, y};
+    verts[1].position = {x, y + height};
+    verts[2].position = {x + width, y + height};
+    verts[3].position = {x + width, y};
+
+    verts[0].color = sf::Color::White;
+    verts[1].color = sf::Color::White;
+    verts[2].color = sf::Color::White;
+    verts[3].color = sf::Color::White;
+
+    position = {x, y};
+    size = {width, height};
+}
+
+void Rectangle::draw(sf::RenderWindow& window)
+{
+    window.draw(verts.data(), verts.size(), sf::Quads);
+}
+
+// Rectangle.new(width, height, x, y)
+int lua_Rectangle_new(lua_State* L)
+{
     float w = (float)luaL_checknumber(L, -1);
     float h = (float)luaL_checknumber(L, -1);
     float x = (float)luaL_checknumber(L, -1);
     float y = (float)luaL_checknumber(L, -1);
-    std::cout << x << " " << y << " " << w << " " << h << std::endl;
-    sf::RectangleShape* test =
-        (sf::RectangleShape*)(lua_newuserdata(L, sizeof(sf::RectangleShape)));
-    new (test) sf::RectangleShape();
-    test->setPosition({x, y});
-    test->setSize({x, y});
 
+    Rectangle* rect = (Rectangle*)lua_newuserdata(L, sizeof(Rectangle));
+    rect->init(w, h, x, y);
 
     luaL_getmetatable(L, "Rectangle");
     lua_setmetatable(L, -2);
+
     return 1;
 }
 
@@ -47,7 +73,6 @@ const luaL_Reg lua_rectLib[] = {
 };
 
 const luaL_Reg lua_rectMethods[] = {
-   // {"print", lua_MetaTest_print},
     {NULL, NULL},
 };
 
@@ -55,69 +80,10 @@ void openLibRectangle(lua_State* L)
 {
     luaL_newmetatable(L, "Rectangle");
     lua_pushvalue(L, -1);
-
-
-
-    
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, lua_rectMethods, 0);
     luaL_newlib(L, lua_rectLib);
     lua_setglobal(L, "Rectangle");
-}
-
-struct Printer {
-    void print(int a, int b)
-    {
-    std::cout << "Meta test: " << a << " " << b << std::endl;
-
-    }
-};
-
-struct MetaTest {
-    int a = 0;
-    int b = 0;
-    Printer printer;
-};
-
-int lua_MetaTest_new(lua_State* L)
-{
-    int a = (int)luaL_checkinteger(L, -1);
-    int b = (int)luaL_checkinteger(L, -1);
-    MetaTest* test = (MetaTest*)(lua_newuserdata(L, sizeof(MetaTest)));
-    test->a = a;
-    test->b = b;
-
-    luaL_getmetatable(L, "MetaTest");
-    lua_setmetatable(L, -2);
-
-    return 1;
-}
-
-int lua_MetaTest_print(lua_State* L)
-{
-    MetaTest* metaTest = (MetaTest*)luaL_checkudata(L, 1, "MetaTest");
-    metaTest->printer.print(metaTest->a, metaTest->b);
-    return 0;
-}
-
-const luaL_Reg metaTestLib[] = {
-    {"new", lua_MetaTest_new},
-    {NULL, NULL},
-};
-
-const luaL_Reg metaTestMethods[] = {
-    {"print", lua_MetaTest_print},
-    {NULL, NULL},
-};
-
-void open_MetaTest(lua_State* L)
-{
-    luaL_newmetatable(L, "MetaTest");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    luaL_setfuncs(L, metaTestMethods, 0);
-    luaL_newlib(L, metaTestLib);
-    lua_setglobal(L, "MetaTest");
 }
 
 int main()
@@ -127,15 +93,7 @@ int main()
 
     // lua_register(L, "functionInCPP", lua_functionInCPP);
 
-    open_MetaTest(L);
     openLibRectangle(L);
-
-    sf::RectangleShape* test =
-        (sf::RectangleShape*)(malloc(sizeof(sf::RectangleShape)));
-    *new (test) sf::RectangleShape();
-    test->setPosition({5, 5});
-    test->setSize({5, 5});
-    free(test);
 
     if (luaOk(L, luaL_dofile(L, "game/main.lua"))) {
         /*
@@ -167,26 +125,35 @@ int main()
     }
 
     // Cleanup
-    lua_close(L);
 
-    /*
-    sf::RenderWindow window({ 1280, 720 }, "Lua Bird");
+    sf::RenderWindow window({1280, 720}, "Lua Bird");
+    window.setFramerateLimit(60);
 
-    if (luaOk(L, luaL_dofile(L, "game/main.lua"))) {
-    }
-
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
 
         window.clear();
+
+
+        lua_getglobal(L, "rects");
+        if (lua_istable(L, -1)) {
+            lua_pushnil(L);
+            while (lua_next(L, -2)) {
+                Rectangle* rect = (Rectangle*)lua_touserdata(L, -1);
+                rect->draw(window);
+                lua_pop(L, 1);
+            }
+            lua_pop(L, 1);
+        }
+
         window.display();
     }
-    */
+
+    lua_close(L);
+
     return 0;
 }
