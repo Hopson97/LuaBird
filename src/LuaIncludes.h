@@ -5,3 +5,5 @@ extern "C" {
 #include <lua/lua.h>
 #include <lua/lualib.h>
 }
+
+bool checkLua(lua_State* L, int result);

@@ -4,16 +4,7 @@
 #include <iostream>
 #include "LuaIncludes.h"
 #include "LuaSprite.h"
-
-bool checkLua(lua_State* L, int result)
-{
-    if (!result == LUA_OK) {
-        auto message = lua_tostring(L, -1);
-        std::cout << "Error: " << message << std::endl;
-        return false;
-    }
-    return true;
-}
+#include "LuaKeyboard.h"
 
 int main()
 {
@@ -21,6 +12,7 @@ int main()
     luaL_openlibs(L);
 
     LuaSprite::luaRegister(L);
+    luaRegisterKeyboard(L);
 
     if (checkLua(L, luaL_dofile(L, "game/main.lua"))) {
         /*
@@ -76,6 +68,7 @@ int main()
             lua_pushnil(L);
             while (lua_next(L, -2)) {
                 LuaSprite* sprite = (LuaSprite*)lua_touserdata(L, -1);
+                
                 sprite->draw(window);
                 lua_pop(L, 1);
             }
