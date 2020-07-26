@@ -6,6 +6,10 @@ project(LuaBird VERSION 1.0)
 #Set executable
 add_executable(${PROJECT_NAME}     
     src/main.cpp
+
+    src/LuaIncludes.cpp
+    src/LuaKeyboard.cpp
+    src/LuaSprite.cpp
 )
 
 #Set C++17
