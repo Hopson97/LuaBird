@@ -10,10 +10,18 @@ local function newSprite(width, height, x, y)
 end
 
 
-function update( ... )
-	
-end
+
 
 
 
 local sprite = newSprite(100, 100, 100, 100)
+local sprite2 = newSprite(100, 300, 500, 100)
+
+
+function update()
+	sprite:move(1, 0);
+
+	if sprite:intersects(sprite2) then
+		print("Intersecting...");
+	end
+end

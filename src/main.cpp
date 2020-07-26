@@ -5,7 +5,7 @@
 #include "LuaIncludes.h"
 #include "LuaSprite.h"
 
-bool luaOk(lua_State* L, int result)
+bool checkLua(lua_State* L, int result)
 {
     if (!result == LUA_OK) {
         auto message = lua_tostring(L, -1);
@@ -22,7 +22,7 @@ int main()
 
     LuaSprite::luaRegister(L);
 
-    if (luaOk(L, luaL_dofile(L, "game/main.lua"))) {
+    if (checkLua(L, luaL_dofile(L, "game/main.lua"))) {
         /*
         lua_getglobal(L, "doStuff");
         if (lua_isfunction(L, -1)) {
@@ -63,9 +63,14 @@ int main()
                 window.close();
         }
 
+        // Update
+        lua_getglobal(L, "update");
+        if (lua_isfunction(L, -1)) {
+            checkLua(L, lua_pcall(L, 0, 0, 0));
+        }
+
+        // Render
         window.clear();
-
-
         lua_getglobal(L, "sprites");
         if (lua_istable(L, -1)) {
             lua_pushnil(L);
@@ -76,7 +81,6 @@ int main()
             }
             lua_pop(L, 1);
         }
-
         window.display();
     }
 

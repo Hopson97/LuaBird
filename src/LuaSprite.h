@@ -7,13 +7,21 @@
 #include "LuaIncludes.h"
 
 struct LuaSprite {
-    std::array<sf::Vertex, 4> verts;
-
-    sf::Vector2f position;
-    sf::Vector2f size;
-
+  public:
     void init(float width, float height, float x, float y);
     void draw(sf::RenderWindow& window);
 
+    void move(float x, float y);
+    bool intersecting(LuaSprite& other) const;
+
     static void luaRegister(lua_State* L);
+
+  private:
+    sf::FloatRect bounds() const; 
+    std::array<sf::Vertex, 4> m_verts;
+
+    sf::Vector2f m_position;
+    sf::Vector2f m_size;
+
+
 };
