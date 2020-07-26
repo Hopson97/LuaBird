@@ -110,7 +110,7 @@ local function stateBegin(dt)
 end
 
 local function stateGame(dt)
-	if Keyboard.isKeyPressed("W") and bird.vy > 0 then
+	if Keyboard.isKeyPressed("Space") and bird.vy > 0 then
 		bird.vy = -BOOST * dt
 	end
 

@@ -7,19 +7,17 @@
 
 void LuaSprite::init(float width, float height, float x, float y)
 {
-    m_verts[0].position = {x, y};
-    m_verts[1].position = {x, y + height};
-    m_verts[2].position = {x + width, y + height};
-    m_verts[3].position = {x + width, y};
+    m_position = {x, y};
+    m_size = {width, height};
+
+    m_texture = nullptr;
+
+    setPosition(x, y);
 
     m_verts[0].color = sf::Color::White;
     m_verts[1].color = sf::Color::White;
     m_verts[2].color = sf::Color::White;
     m_verts[3].color = sf::Color::White;
-
-    m_position = {x, y};
-    m_size = {width, height};
-    m_texture = nullptr;
 }
 
 void LuaSprite::draw(sf::RenderWindow& window)
@@ -72,7 +70,7 @@ sf::FloatRect LuaSprite::bounds() const
     sf::FloatRect rect;
     rect.width = m_size.x;
     rect.height = m_size.y;
-    rect.top = m_position.x;
+    rect.top = m_position.y;
     rect.left = m_position.x;
     return rect;
 }
